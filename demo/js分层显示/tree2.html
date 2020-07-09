@@ -1,0 +1,205 @@
+
+<html>
+<script   src="http://code.jquery.com/jquery-1.12.4.js"   integrity="sha256-Qw82+bXyGq6MydymqBxNPYTaUXXq7c8v3CwiYwLLNXU="   crossorigin="anonymous"></script>
+<div id="all">
+ 
+</div>
+ 
+<script>
+ 
+	//准备渲染的数组
+	var data = {
+		code: 200,
+			data: [
+		{
+			children: [],
+			name: "词库管理",
+		},
+		{
+			children: [
+				{
+					children: [ ],
+					name: "模型列表",
+				}
+			],
+			name: "智能分类",
+		},
+		{
+			children: [
+				{
+					children: [ ],
+					name: "热点事件",
+				},
+				{
+					children: [ ],
+					name: "新事件检测",
+				},
+				{
+					children: [ ],
+					name: "规则配置",
+				}
+			],
+			name: "事件检测",
+		},
+		{
+			children: [
+				{
+					children: [ ],
+					name: "修改密码",
+				}
+			],
+			name: "用户中心",
+		},
+		{
+			children: [
+				{
+					children: [ ],
+					name: "用户列表",
+				},
+				{
+					children: [ ],
+					name: "角色列表",
+				},
+				{
+					children: [ ],
+					name: "菜单列表",
+				}
+			],
+			name: "权限管理",
+		}
+	],
+		message: "请求成功"
+	};
+ 
+ 
+	//渲染函数
+	/**
+	 *
+	 * @param data  待渲染的数组
+	 * @param deep  深度
+	 * @param margin margin-left 每次的距离
+	 */
+	function xuanran(data, deep, margin = 30) {
+ 
+		//获取data数组的长度
+		var len = data.length;
+		for (var i = 0; i < len; i++) {
+ 
+ 
+			var app = document.getElementById('all');
+ 
+			//创建一个div标签
+			var div = document.createElement("div");
+ 
+			//创建一个 input标签 代表 checkbox多选矿
+			var checkbox = document.createElement('input');
+ 
+			//创建一个 p标签代表文字
+			var ptext = document.createElement('p');
+ 
+			//将这个 名字放入p标签
+			ptext.innerHTML = data[i].name;
+ 
+			//设置 p 比阿倩的属性为 内联
+			ptext.style.cssText = 'display: inline-block';
+ 
+			//给P标签添加一个class
+			ptext.setAttribute('class', 'clickPtext');
+ 
+			//设置input标签的类型  添加class
+			checkbox.setAttribute('type', 'checkbox');
+			checkbox.setAttribute('class', 'clickBox');
+ 
+			//给div标签添加 data-deep  和 data-show
+			/**
+			 * data-deep控制深度
+			 * 初始深度为0  依次增加
+			 * data-show控制子标签是显示还是隐藏
+			 */
+			div.setAttribute("data-deep", deep);
+			div.setAttribute('data-show', '0');
+			div.style.cssText = 'margin-left: ' + (deep * margin) + 'px;';
+ 
+			//最开始 不把初级目录隐藏
+			if (deep != 0) {
+				div.style.cssText += 'display:none;';
+			}
+ 
+			//将 checkbox 和 p 标签 一起写入 div  再将div输出到html中
+			div.appendChild(checkbox);
+			div.appendChild(ptext);
+			app.appendChild(div);
+
+		if (data[i].children.length > 0) {
+				xuanran(data[i].children, deep + 1, 30);
+			}
+		}
+	}
+ 
+ 
+	xuanran(data.data, 0, 30);
+ 
+	//添加onclick
+	$('.clickBox').attr('onclick', 'clickBoxFun(this, false)');
+ 
+	//添加onclick
+	$('.clickPtext').attr('onclick', 'clickPtextFun(this, false)');
+ 
+	/**
+	 * 控制菜单显示隐藏
+	 * @param obj  点击的元素
+	 * @param is   是否隐藏， true 为再次点击后不隐藏， false 再次点击后隐藏
+	 */
+	function clickPtextFun(obj, is = false) {
+ 
+		////点击的p 父元素的所有下面的兄弟元素
+		var nextBro = $(obj).parent().nextAll();
+ 
+		//点击的p的父元素
+		var div     = $(obj).parent();
+		for (var i = 0; i < nextBro.length; i++) {
+			//当它下面的所有兄弟元素的深度 比他大一个数时， 代表他的儿子元素， 否则退出。 因为不比他大的都是兄弟元素或者父元素
+			if ($(nextBro[i]).data('deep') == div.data('deep') + 1) {
+				if (div.data('show') == 0 || div.data('show') == '0') {
+					$(nextBro[i]).show();
+				} else {
+					if (!is) {
+						$(nextBro[i]).hide();
+					}
+				}
+			} else {
+				break;
+			}
+		}
+		div.data('show', (div.data('show') + 1) % 2);
+	}
+	/**
+	 * 选框控制
+	 * @param obj
+	 */
+	function clickBoxFun(obj) {
+		//当第一次点击选框后， 将列表展开  true为再次点击不隐藏
+		clickPtextFun(obj, true);
+		//点击的checkbox 父元素的所有下面的兄弟元素
+		var nextBro = $(obj).parent().nextAll();
+		//点击的checkbox的父元素
+		var thisDiv = $(obj).parent();
+		for (var i = 0; i < nextBro.length; i++) {
+			//当他下面的深度大于它时， 全部选中， 否则就退出。 因为小于或等于的 都是兄弟元素或者父元素
+			if ($(nextBro[i]).data('deep') > thisDiv.data('deep')) {
+				if (thisDiv.find('input').is(':checked')) {
+					$(nextBro[i]).find('input').prop('checked', true);
+				} else {
+					$(nextBro[i]).find('input').prop('checked', false);
+				}
+			} else {
+				break;
+			}
+		}
+ 
+	}
+ 
+ 
+ 
+</script>
+</html>

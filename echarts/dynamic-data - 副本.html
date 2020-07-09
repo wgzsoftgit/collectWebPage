@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+   <head>
+       <meta charset="utf-8">
+   </head>
+   <body style="height: 100%; margin: 0">
+       <div id="container" style="height: 100%"></div>
+       <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+       <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts-gl/dist/echarts-gl.min.js"></script>
+       <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts-stat/dist/ecStat.min.js"></script>
+       <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts/dist/extension/dataTool.min.js"></script>
+       <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts/map/js/china.js"></script>
+       <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts/map/js/world.js"></script>
+      <!--  <script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=xfhhaTThl11qYVrqLZii6w8qE5ggnhrY&__ec_v__=20190126"></script> -->
+      <!--  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts/dist/extension/bmap.min.js"></script> -->
+      
+<!-- <div class="full-width">
+    <div id="elecBarChart" class="elecBarChart"></div>
+</div> -->
+       <script type="text/javascript">
+var data=[{"qoq":12,"area_name":"业务办理量","biz_num":[10,11,23,13,15],"qoq":[32,22,321,21,34]},{"qoq":16,"area_name":"环比"}];
+        showBarChart(data);
+
+//显示业务办理量趋势柱形-折线图
+function showBarChart(data){
+    $scope={};
+    var elecBarChart = echarts.init(document.getElementById('container'));
+    var elecBarOption = getElecBarOption();
+    $scope.barMax = parseFloat(data[0].qoq);
+    $scope.barMin = parseFloat(data[0].qoq);
+    for(var i = 0;i < data.length;i++){
+        var cur = parseFloat(data[i].qoq);
+        var cur2 = parseFloat(data[i].qoq);
+        cur > $scope.barMax ? $scope.barMax = cur : null;
+        cur2 < $scope.barMin ? $scope.barMin = cur2 : null;
+ 
+        elecBarOption.xAxis[0].data.push(data[i].area_name);
+        elecBarOption.series[0].data.push(data[i].biz_num);
+        elecBarOption.series[1].data.push(data[i].qoq);
+    }
+    elecBarOption.yAxis[1].min = Math.floor($scope.barMin);//折线图y轴的最大坐标
+    elecBarOption.yAxis[1].max = Math.ceil($scope.barMax);//折线图y轴的最小坐标
+    elecBarChart.setOption(elecBarOption);
+}
+ 
+function getElecBarOption() {
+    var option = {
+        legend: {//图例组件
+            x: 'center',
+            y: 'bottom',
+            show: true,
+            textStyle: {//图例的公用文本样式。
+                fontSize: 14,
+                color: "#333",
+            },
+            itemGap: 20,//图例每项之间的间隔。横向布局时为水平间隔，纵向布局时为纵向间隔。
+            data: ['业务办理量', '环比'],//图例的数据数组。
+            inactiveColor: '#ccc',//图例关闭时的颜色。
+        },
+        grid: {//直角坐标系内绘图网格
+            bottom: '12%',//grid 组件离容器下侧的距离。
+            left: '1%',
+            right: '10%',
+            containLabel: true//grid 区域是否包含坐标轴的刻度标签。
+        },
+        dataZoom: [//dataZoom 组件 用于区域缩放，从而能自由关注细节的数据信息，或者概览数据整体，或者去除离群点的影响。
+            {
+                show: true,
+                start: 0,
+                end: 100
+            },
+            {
+                type: 'inside',
+                start: 0,
+                end: 100
+            },
+        ],
+        xAxis: [
+            {
+                type: 'category',
+                data: [],
+                axisPointer: {
+                    type: 'shadow'
+                },
+                axisTick: {
+                    show: true,
+                    interval: 0
+                },
+                axisLabel: {
+                    fontSize: 14,
+                    color: "#333",
+                },
+            }],
+        yAxis: [
+            {
+                type: 'value',
+                show:true,
+                splitNumber: 10,//坐标轴的分割段数
+                axisLabel: {
+                    fontSize: 14,
+                    color: "#333",
+                },
+                splitLine: {
+                    show: false//是否显示分隔线。
+                },
+            },
+            {
+                type: 'value',
+                min: '',//最小坐标
+                max: '',//最大坐标
+                axisLabel: {
+                    fontSize: 14,
+                    color: "#333",
+                    formatter: '{value} %'
+                },
+                splitLine: {
+                    show: false//是否显示分隔线。
+                },
+            }
+        ],
+        series: [
+            {
+                name:'业务办理量',
+                type:'bar',
+                data:[],
+                barWidth : '50%',
+                itemStyle : {
+                    normal : {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{//图例使用渐变色
+                            offset: 0,
+                            color: 'rgb(0, 102, 255)'
+                        }, {
+                            offset: 1,
+                            color: 'rgb(0, 153, 255)'
+                        }]),
+                        label : {
+                            show : true,
+                            position : 'top',
+                            textStyle : {
+                                fontSize : '15',
+                                fontWeight : 'bold',
+                                color: 'rgb(51, 51, 51)',
+                            }
+                        },
+                    },
+                },
+            },
+            {
+                name:'环比',
+                type:'line',
+                yAxisIndex: 1,    //这里要设置哪个y轴，默认是最左边的是0，然后1，2顺序来。
+                data:[],
+                symbolSize:10,
+                itemStyle : {
+                    normal : {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                            offset: 0,
+                            color: 'rgb(255, 204, 102)'
+                        }, {
+                            offset: 1,
+                            color: 'rgb(255, 153, 51)'
+                        }]),
+                        label : {
+                            show : true,
+                            position : 'top',
+                            textStyle : {
+                                fontSize : '14',
+                                color: 'rgb(255, 156, 54)',
+                            }
+                        }
+                    },
+                },
+            },
+        ]
+    }
+    return option;
+}
+
+       </script>
+   </body>
+</html>

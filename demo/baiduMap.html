@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>百度离线版DEMO</title>
+ <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=V6RjjChFXrifV2z41z0sYQEO"></script> 
+</head>
+<body>
+<div style="width:800px;height:620px;border:1px solid gray" id="container"></div>
+</body>
+</html>
+<script type="text/javascript">
+var container=document.getElementById('container')
+var map = new BMap.Map("container",{minZoom:5,maxZoom:18});
+var point = new BMap.Point(113.682327,34.753759);    // 创建点坐标
+map.centerAndZoom(point,11);                     // 初始化地图,设置中心点坐标和地图级别。
+
+map.addControl(new BMap.NavigationControl());
+map.enableScrollWheelZoom();                  // 启用滚轮放大缩小。
+map.enableKeyboard();                         // 启用键盘操作。  
+
+
+var marker = new BMap.Marker(point);
+map.addOverlay(marker); 
+marker.enableDragging();    
+marker.addEventListener("dragend", function(e){ 
+ console.log('lng:'+e.point.lng+','+'lat:'+e.point.lat)
+})
+
+
+var a='中原区 二七区 管城回族区 金水区 上街区 惠济区 中牟县 巩义市 荥阳市 新密市 新郑市 登封市 河南  杭州 滨江区 绍兴';
+var lyCity=a.split(" "); 
+for(var i=0;i<lyCity.length;i++){
+    getBoundary(lyCity[i]);
+}
+function getBoundary(name){   
+
+    var bdary = new BMap.Boundary();
+    bdary.get(name, function(rs){    //获取行政区域
+        var count = rs.boundaries.length; //行政区域的点有多少个
+        var pointArray = [];
+        for (var i = 0; i < count; i++) {
+
+
+            //console.log(name,'{"lng":'+rs.boundaries[i].replace(/,/g,',"lat":').replace(/;/g,'},{"lng":')+"}");
+            console.log(name,'['+rs.boundaries[i].replace(/;/g,'],[')+']');
+
+            var ply = new BMap.Polygon(rs.boundaries[i], {strokeWeight: 2, strokeColor: "#ff0000",fillColor:'transparent'}); //建立多边形覆盖物
+            map.addOverlay(ply);  //添加覆盖物
+            pointArray = pointArray.concat(ply.getPath());
+
+
+        }
+        map.setViewport(pointArray);
+    }); 
+}
+
+</script>
